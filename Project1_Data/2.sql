@@ -1,3 +1,5 @@
+#Initial query №2
+
 SELECT country.country 
 	FROM public.country, public.city, public.address, public.customer 
 	where country.country_id=city.country_id and city.city_id=address.city_id
