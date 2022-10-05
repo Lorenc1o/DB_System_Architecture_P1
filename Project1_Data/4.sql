@@ -1,5 +1,6 @@
-select 
-customer.customer_id, customer.last_name
+#Initial query №4
+
+select customer.customer_id, customer.last_name
 from public.customer
 inner join public.rental on rental.customer_id = customer.customer_id
 inner join public.inventory ON inventory.inventory_id = rental.inventory_id
