@@ -1,4 +1,4 @@
-#Initial query №2
+--Initial query №2
 
 SELECT country.country 
 	FROM public.country, public.city, public.address, public.customer 

@@ -1,4 +1,4 @@
-#Initial query №4
+--Initial query №4
 
 select customer.customer_id, customer.last_name
 from public.customer

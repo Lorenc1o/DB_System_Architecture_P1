@@ -95,7 +95,7 @@ CREATE FUNCTION public.film_in_stock(p_film_id integer, p_store_id integer, OUT 
     LANGUAGE sql
     AS $_$
      SELECT inventory_id
-     FROM inventory
+     from inventory
      WHERE film_id = $1
      AND store_id = $2
      AND inventory_in_stock(inventory_id);
@@ -112,7 +112,7 @@ CREATE FUNCTION public.film_not_in_stock(p_film_id integer, p_store_id integer, 
     LANGUAGE sql
     AS $_$
     SELECT inventory_id
-    FROM inventory
+    from inventory
     WHERE film_id = $1
     AND store_id = $2
     AND NOT inventory_in_stock(inventory_id);
@@ -140,7 +140,7 @@ DECLARE
     v_payments DECIMAL(5,2); --#SUM OF PAYMENTS MADE PREVIOUSLY
 BEGIN
     SELECT COALESCE(SUM(film.rental_rate),0) INTO v_rentfees
-    FROM film, inventory, rental
+    from film, inventory, rental
     WHERE film.film_id = inventory.film_id
       AND inventory.inventory_id = rental.inventory_id
       AND rental.rental_date <= p_effective_date
@@ -148,14 +148,14 @@ BEGIN
 
     SELECT COALESCE(SUM(IF((rental.return_date - rental.rental_date) > (film.rental_duration * '1 day'::interval),
         ((rental.return_date - rental.rental_date) - (film.rental_duration * '1 day'::interval)),0)),0) INTO v_overfees
-    FROM rental, inventory, film
+    from rental, inventory, film
     WHERE film.film_id = inventory.film_id
       AND inventory.inventory_id = rental.inventory_id
       AND rental.rental_date <= p_effective_date
       AND rental.customer_id = p_customer_id;
 
     SELECT COALESCE(SUM(payment.amount),0) INTO v_payments
-    FROM payment
+    from payment
     WHERE payment.payment_date <= p_effective_date
     AND payment.customer_id = p_customer_id;
 
@@ -178,7 +178,7 @@ DECLARE
 BEGIN
 
   SELECT customer_id INTO v_customer_id
-  FROM rental
+  from rental
   WHERE return_date IS NULL
   AND inventory_id = p_inventory_id;
 
@@ -203,7 +203,7 @@ BEGIN
     -- FOR THE ITEM OR ALL ROWS HAVE return_date POPULATED
 
     SELECT count(*) INTO v_rentals
-    FROM rental
+    from rental
     WHERE inventory_id = p_inventory_id;
 
     IF v_rentals = 0 THEN
@@ -211,7 +211,7 @@ BEGIN
     END IF;
 
     SELECT COUNT(rental_id) INTO v_out
-    FROM inventory LEFT JOIN rental USING(inventory_id)
+    from inventory LEFT JOIN rental USING(inventory_id)
     WHERE inventory.inventory_id = p_inventory_id
     AND rental.return_date IS NULL;
 
@@ -233,10 +233,10 @@ CREATE FUNCTION public.last_day(timestamp without time zone) RETURNS date
     LANGUAGE sql IMMUTABLE STRICT
     AS $_$
   SELECT CASE
-    WHEN EXTRACT(MONTH FROM $1) = 12 THEN
-      (((EXTRACT(YEAR FROM $1) + 1) operator(pg_catalog.||) '-01-01')::date - INTERVAL '1 day')::date
+    WHEN EXTRACT(MONTH from $1) = 12 THEN
+      (((EXTRACT(YEAR from $1) + 1) operator(pg_catalog.||) '-01-01')::date - INTERVAL '1 day')::date
     ELSE
-      ((EXTRACT(YEAR FROM $1) operator(pg_catalog.||) '-' operator(pg_catalog.||) (EXTRACT(MONTH FROM $1) + 1) operator(pg_catalog.||) '-01')::date - INTERVAL '1 day')::date
+      ((EXTRACT(YEAR from $1) operator(pg_catalog.||) '-' operator(pg_catalog.||) (EXTRACT(MONTH from $1) + 1) operator(pg_catalog.||) '-01')::date - INTERVAL '1 day')::date
     END
 $_$;
 
@@ -319,7 +319,7 @@ BEGIN
     END IF;
 
     last_month_start := CURRENT_DATE - '3 month'::interval;
-    last_month_start := to_date((extract(YEAR FROM last_month_start) || '-' || extract(MONTH FROM last_month_start) || '-01'),'YYYY-MM-DD');
+    last_month_start := to_date((extract(YEAR from last_month_start) || '-' || extract(MONTH from last_month_start) || '-01'),'YYYY-MM-DD');
     last_month_end := LAST_DAY(last_month_start);
 
     /*
@@ -333,7 +333,7 @@ BEGIN
 
     tmpSQL := 'INSERT INTO tmpCustomer (customer_id)
         SELECT p.customer_id
-        FROM payment AS p
+        from payment AS p
         WHERE DATE(p.payment_date) BETWEEN '||quote_literal(last_month_start) ||' AND '|| quote_literal(last_month_end) || '
         GROUP BY customer_id
         HAVING SUM(p.amount) > '|| min_dollar_amount_purchased || '
@@ -345,7 +345,7 @@ BEGIN
     Output ALL customer information of matching rewardees.
     Customize output as needed.
     */
-    FOR rr IN EXECUTE 'SELECT c.* FROM tmpCustomer AS t INNER JOIN customer AS c ON t.customer_id = c.customer_id' LOOP
+    FOR rr IN EXECUTE 'SELECT c.* from tmpCustomer AS t INNER JOIN customer AS c ON t.customer_id = c.customer_id' LOOP
         RETURN NEXT rr;
     END LOOP;
 
@@ -762,99 +762,97 @@ ALTER TABLE public.store OWNER TO postgres;
 -- Data for Name: actor; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.actor (actor_id, first_name, last_name, last_update)
-FROM 'pathToData/3057.dat'
+\copy public.actor (actor_id, first_name, last_name, last_update) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3057.dat';
 
 --
 -- Data for Name: address; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.address (address_id, address, address2, district, city_id, postal_code, phone, last_update) 
-FROM 'pathToData/3065.dat';
+\copy public.address (address_id, address, address2, district, city_id, postal_code, phone, last_update) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3065.dat';
 
 --
 -- Data for Name: category; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.category (category_id, name, last_update) FROM '$$PATH$$/3059.dat';
+\copy public.category (category_id, name, last_update) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3059.dat';
 
 --
 -- Data for Name: city; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.city (city_id, city, country_id, last_update) FROM '$$PATH$$/3067.dat';
+\copy public.city (city_id, city, country_id, last_update) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3067.dat';
 
 --
 -- Data for Name: country; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.country (country_id, country, last_update) FROM  '$$PATH$$/3069.dat';
+\copy public.country (country_id, country, last_update) from  '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3069.dat';
 
 --
 -- Data for Name: customer; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.customer (customer_id, store_id, first_name, last_name, email, address_id, activebool, create_date, last_update, active) From '$$PATH$$/3055.dat';
+\copy public.customer (customer_id, store_id, first_name, last_name, email, address_id, activebool, create_date, last_update, active) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3055.dat';
 
 --
 -- Data for Name: film; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.film (film_id, title, description, release_year, language_id, rental_duration, rental_rate, length, replacement_cost, rating, last_update, special_features, fulltext) FROM '$$PATH$$/3061.dat';
+\copy public.film (film_id, title, description, release_year, language_id, rental_duration, rental_rate, length, replacement_cost, rating, last_update, special_features, fulltext) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3061.dat';
 
 --
 -- Data for Name: film_actor; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.film_actor (actor_id, film_id, last_update) FROM '$$PATH$$/3062.dat';
+\copy public.film_actor (actor_id, film_id, last_update) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3062.dat';
 
 --
 -- Data for Name: film_category; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 
-COPY public.film_category (film_id, category_id, last_update) FROM '$$PATH$$/3063.dat';
+\copy public.film_category (film_id, category_id, last_update) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3063.dat';
 
 --
 -- Data for Name: inventory; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
-COPY public.inventory (inventory_id, film_id, store_id, last_update) FROM '$$PATH$$/3071.dat';
+\copy public.inventory (inventory_id, film_id, store_id, last_update) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3071.dat';
 
 --
 -- Data for Name: language; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 
-COPY public.language (language_id, name, last_update) FROM '$$PATH$$/3073.dat';
+\copy public.language (language_id, name, last_update) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3073.dat';
 
 --
 -- Data for Name: payment; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 
-COPY public.payment (payment_id, customer_id, staff_id, rental_id, amount, payment_date) FROM '$$PATH$$/3075.dat';
+\copy public.payment (payment_id, customer_id, staff_id, rental_id, amount, payment_date) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3075.dat';
 
 --
 -- Data for Name: rental; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 
-COPY public.rental (rental_id, rental_date, inventory_id, customer_id, return_date, staff_id, last_update) FROM '$$PATH$$/3077.dat';
+\copy public.rental (rental_id, rental_date, inventory_id, customer_id, return_date, staff_id, last_update) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3077.dat';
 
 --
 -- Data for Name: staff; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 
-COPY public.staff (staff_id, first_name, last_name, address_id, email, store_id, active, username, password, last_update, picture) FROM '$$PATH$$/3079.dat';
+\copy public.staff (staff_id, first_name, last_name, address_id, email, store_id, active, username, password, last_update, picture) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3079.dat';
 
 --
 -- Data for Name: store; Type: TABLE DATA; Schema: public; Owner: postgres
 --
 
 
-COPY public.store (store_id, manager_staff_id, address_id, last_update) FROM '$$PATH$$/3081.dat';
+\copy public.store (store_id, manager_staff_id, address_id, last_update) from '/home/jose/Escritorio/Lorenc1o-repos/DB_System_Architecture_P1/Project1_Data/Data/3081.dat';
 
 --
 -- Name: actor_actor_id_seq; Type: SEQUENCE SET; Schema: public; Owner: postgres

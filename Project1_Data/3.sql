@@ -1,4 +1,4 @@
-#Initial query №3
+--Initial query №3
 
 WITH cte as (
 Select customer.customer_id, customer.last_name, date(rental.return_date) as date
