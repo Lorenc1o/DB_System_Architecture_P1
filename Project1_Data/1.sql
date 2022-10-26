@@ -17,6 +17,7 @@ CREATE INDEX inventrory_film_id ON inventory USING Hash (film_id);
 
 CREATE INDEX rental_inventory_id ON rental USING Hash (inventory_id);
 
+
 SELECT customer.customer_id, customer.last_name
 FROM public.customer 
 INNER JOIN public.rental ON rental.customer_id = customer.customer_id
