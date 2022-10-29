@@ -48,9 +48,11 @@ FROM public.customer,
 --Query №4
 
 SELECT customer.customer_id, customer.last_name
-FROM public.customer,
-public.film_category
+FROM public.film_category
 INNER JOIN public.inventory ON inventory.film_id = film_category.film_id
 INNER JOIN public.rental ON rental.inventory_id = inventory.inventory_id
+INNER JOIN public.customer ON rental.customer_id = customer.customer_id
 GROUP BY customer.customer_id, rental.customer_id
-HAVING COUNT(DISTINCT film_category.category_id) = (SELECT count(category_id) FROM public.category)  AND rental.customer_id = customer.customer_id;
+HAVING COUNT(DISTINCT film_category.category_id) = 
+	(SELECT count(category_id) 
+	 FROM public.category);

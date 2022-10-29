@@ -1,2 +1,4 @@
 #Each will have a different restore.sql file
 restore.sql
+#I have some testing files
+test*
