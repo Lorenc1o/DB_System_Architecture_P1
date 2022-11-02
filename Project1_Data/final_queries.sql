@@ -7,13 +7,18 @@ CREATE INDEX rental_inventory_id ON rental USING Hash (inventory_id);
 
 --Query №1
 
-SELECT customer.customer_id, customer.last_name
-FROM public.customer 
-INNER JOIN public.rental ON rental.customer_id = customer.customer_id
-INNER JOIN public.inventory ON inventory.inventory_id = rental.inventory_id
-INNER JOIN public.film ON film.film_id = inventory.film_id
-GROUP BY customer.customer_id
-HAVING MAX(film.length) < 180;
+Select customer.customer_id, customer.last_name
+from 
+	(Select rental.customer_id
+	from public.rental 
+	EXCEPT
+		SELECT distinct rental.customer_id
+		FROM (SELECT film.film_id
+		from public.film
+		where film.length >= 180) as longMovies 
+		inner join public.inventory on longMovies.film_id = inventory.film_id
+		inner join public.rental on rental.inventory_id = inventory.inventory_id) as shortMovies
+inner join public.customer on shortMovies.customer_id = customer.customer_id
 
 
 --Query №2
