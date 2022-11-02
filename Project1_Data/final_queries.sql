@@ -37,16 +37,19 @@ inner join public.country on country.country_id = city.country_id
 
 --Query №3
 
-SELECT customer.customer_id, customer.last_name
-FROM public.customer,
-     (
-      SELECT rental.customer_id, date(rental.return_date) AS date
-      FROM public.rental
-      GROUP BY rental.customer_id, date
-      HAVING COUNT(rental.rental_id) >= 4 
+Select customer.customer_id, customer.last_name
+from 
+	(select rent.customer_id
+	from (
+		select rental.customer_id, date(rental.return_date) as date
+		from public.rental
+		group by rental.customer_id,  date
+         having count(rental.rental_id) >= 4 
 		) as rent
-	GROUP BY rent.customer_id, customer.customer_id, customer.last_name
-	HAVING COUNT(rent.date) > 1 AND rent.customer_id = customer.customer_id;
+	group by rent.customer_id
+	having count(rent.date) > 1  
+	) as rent2
+inner join public.customer on customer.customer_id = rent2.customer_id
 	
 	
 --Query №4
